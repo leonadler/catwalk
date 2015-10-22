@@ -1,0 +1,26 @@
+{
+  "name": "catwalk",
+  "version": "0.1.0",
+  "description": "Typed models for AngularJS & Vanilla JavaScript",
+  "main": "catwalk.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leonadler/catwalk.git"
+  },
+  "keywords": [
+    "mvc",
+    "model",
+    "class",
+    "angular",
+    "angularjs"
+  ],
+  "author": "Leon Adler",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/leonadler/catwalk/issues"
+  },
+  "homepage": "https://github.com/leonadler/catwalk#readme"
+}

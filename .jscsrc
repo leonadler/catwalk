@@ -1,0 +1,24 @@
+{
+  "preset": "google",
+
+  "disallowMultipleLineBreaks": false,
+  "disallowMultipleVarDecl": false,
+  "disallowSpacesInFunction": false,
+  "disallowSpacesInFunctionDeclaration": false,
+  "disallowSpacesInFunctionExpression": false,
+  "disallowSpacesInAnonymousFunctionExpression": false,
+  "disallowSpacesInsideObjectBrackets": false,
+  "requireSpacesInsideObjectBrackets": "all",
+  "requireSpacesInFunction": {
+    "beforeOpeningRoundBrace": true,
+    "beforeOpeningCurlyBrace": true
+  },
+  "requireSpacesInFunctionExpression": {
+    "beforeOpeningRoundBrace": true,
+    "beforeOpeningCurlyBrace": true
+  },
+  "requireSpacesInNamedFunctionExpression": {
+    "beforeOpeningRoundBrace": true,
+    "beforeOpeningCurlyBrace": true
+  }
+}

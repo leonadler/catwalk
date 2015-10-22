@@ -1,0 +1,9 @@
+*.css eol=lf
+*.git* eol=lf
+*.html eol=lf
+*.htm eol=lf
+*.js eol=lf
+*.json eol=lf
+*.md eol=lf
+*.txt eol=lf
+*.xml eol=lf
