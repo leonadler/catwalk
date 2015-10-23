@@ -1,4 +1,8 @@
 {
+  "excludeFiles": [
+    "**/*.md",
+    "**/*.min.js"
+  ],
   "preset": "google",
 
   "disallowMultipleLineBreaks": false,
@@ -8,6 +12,11 @@
   "disallowSpacesInFunctionExpression": false,
   "disallowSpacesInAnonymousFunctionExpression": false,
   "disallowSpacesInsideObjectBrackets": false,
+  "maximumLineLength": {
+    "value": 100,
+    "tabSize": 1,
+    "allExcept": [ "functionSignature", "urlComments", "regex" ]
+  },
   "requireSpacesInsideObjectBrackets": "all",
   "requireSpacesInFunction": {
     "beforeOpeningRoundBrace": true,
@@ -20,5 +29,16 @@
   "requireSpacesInNamedFunctionExpression": {
     "beforeOpeningRoundBrace": true,
     "beforeOpeningCurlyBrace": true
-  }
+  },
+  "requireCurlyBraces": [
+    "else",
+    "for",
+    "while",
+    "do",
+    "try",
+    "catch",
+    "case",
+    "default"
+  ],
+  "validateLineBreaks": "LF"
 }
