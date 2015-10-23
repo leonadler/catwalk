@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+  <head>
+    <meta encoding="UTF-8" />
+    <style>pre, code {
+      display: inline-block;
+      background: #eee;
+      word-wrap: break-word;
+    }
+    </style>
+    <script src="../catwalk.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
+  </head>
+  <body ng-app="catwalk-test">
+    <h1>Test page for catwalk.js + AngularJS</h1>
+
+    <div style="border: 1px solid gray" ng-controller="TestController">
+      <h3>{{book.title}} ({{book.yearReleased}})</h3>
+      <p>by <input ng-model="book.author" /></p>
+      <p>in {{book.genre}}</p>
+      <p>published by {{book.publisher}}</p>
+
+      <hr />
+
+      <p>Result for <code>JSON.stringify(new Book())</code>:<p>
+      <pre id="result">{{book | jsonify:2}}</pre>
+    </div>
+
+    <script>
+      function createUniqueID () {
+        return Math.round((Math.pow(36, 17) - Math.random() * Math.pow(36, 16))).toString(36).slice(1);
+      }
+
+      var Book = new Catwalk.Model('Book', {
+        id: {
+          type: String,
+          readonly: true,
+          default: createUniqueID
+        },
+        title: {
+          type: String,
+          minLength: 3,
+          maxLenght: 255
+        },
+        author: {
+          type: String,
+          minLength: 3,
+          maxLength: 255
+        },
+        yearReleased: {
+          type: Number,
+          min: 1900,
+          max: 2100
+        },
+        genre: String,
+        publisher: String
+      });
+
+      var app = angular.module('catwalk-test', []);
+      app.controller('TestController', function ($scope) {
+
+        $scope.book = window.myBook = new Book ({
+          title: "JavaScript: The Definitive Guide",
+          author: "David Flanagan",
+          yearReleased: 2011,
+          genre: "Programming",
+          publisher: "O'Reilly and Associates"
+        });
+        $scope.bookAsJSON = function () {
+          return JSON.stringify($scope.book, null, 2);
+        };
+
+      });
+      app.filter('jsonify', function () {
+        return function (input, format) {
+          return JSON.stringify(input, null, format);
+        };
+      });
+    </script>
+  </body>
+</html>
