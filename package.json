@@ -1,10 +1,12 @@
 {
   "name": "catwalk",
-  "version": "0.1.0",
   "description": "Typed models for AngularJS & Vanilla JavaScript",
+  "version": "0.1.0",
+  "license": "MIT",
+  "engineStrict": true,
   "main": "catwalk.js",
   "scripts": {
-    "test": "node test.js"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -18,9 +20,12 @@
     "angularjs"
   ],
   "author": "Leon Adler",
-  "license": "MIT",
   "bugs": {
     "url": "https://github.com/leonadler/catwalk/issues"
   },
-  "homepage": "https://github.com/leonadler/catwalk#readme"
+  "homepage": "https://github.com/leonadler/catwalk#readme",
+  "devDependencies": {
+    "chai": "^3.4.0",
+    "mocha": "^2.3.3"
+  }
 }
