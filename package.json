@@ -3,7 +3,6 @@
   "description": "Typed models for AngularJS & Vanilla JavaScript",
   "version": "0.1.0",
   "license": "MIT",
-  "engineStrict": true,
   "main": "catwalk.js",
   "scripts": {
     "test": "mocha",
