@@ -6,7 +6,8 @@
   "engineStrict": true,
   "main": "catwalk.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "jscs": "jscs ."
   },
   "repository": {
     "type": "git",
@@ -26,6 +27,7 @@
   "homepage": "https://github.com/leonadler/catwalk#readme",
   "devDependencies": {
     "chai": "^3.4.0",
+    "jscs": "^2.4.0",
     "mocha": "^2.3.3"
   }
 }
