@@ -122,23 +122,9 @@
           get: function () { return this._[key]; }
         };
 
-        if (typeof property.set == 'function') {
-          // Define setter if configured for that property
-          descriptor.set = function (value) {
-            this._[key] = property.set.call(this, value);
-          };
-        } else if (!property.readonly) {
-          // Or define default setter if the property is not readonly
-          descriptor.set = function (value) {
-            if (typeof value != primitiveType) {
-              throw new TypeError('Wrong type ' + (typeof value) + ' for property ' + key);
-            }
-            if (primitiveType == 'object' && !(value instanceof valueType)) {
-              var msg = 'Wrong type ' + value.prototype.constructor + ' for property ' + key;
-              throw new TypeError(msg);
-            }
-            this._[key] = value;
-          };
+        var setter = buildSetter(key, property);
+        if (setter) {
+          descriptor.set = setter;
         }
 
         allDescriptors[key] = descriptor;
@@ -155,7 +141,7 @@
 
     Object.defineProperties(newClass.prototype, allDescriptors);
 
-    // Path models to return expected JSON
+    // Patch models to return expected JSON
     newClass.prototype.toJSON = function () {
       return this._;
     };
@@ -177,5 +163,99 @@
     string: '',
     object: null
   };
+
+  /**
+  * Builds a property setter from a property hash.
+  *
+  * @param {object} property - Object describing the property type & validations
+  * @param {string} property.type - type/"class" of the property
+  * @param {string} property.primitiveType - "typeof-type" of the property
+  * @returns {null|function} - A setter to define on the prototype, null for readonly properties
+  */
+  function buildSetter (name, property) {
+    if (typeof property.set == 'function') {
+      // If a setter is defined in the property hash just forward to it
+      return function (value) {
+        this._[name] = property.set.call(this, value);
+      };
+    }
+
+    if (property.readonly) {
+      return null;
+    }
+
+    // Define a setter based on the property hash which validates the input value
+    var validations = buildValidations(name, property);
+    if (!validations) {
+      return function slackedSetter (value) {
+        this._[name] = value;
+      };
+    }
+
+    return function validatingSetter (value) {
+      for (var i = 0; i < validations.length; i++) {
+        if (!validations[i](value)) {
+          throw new TypeError('Invalid value ' + value + ' for property ' + name);
+        }
+      }
+      this._[name] = value;
+    };
+  }
+
+  /**
+  * Builds validation handlers based on a property hash.
+  *
+  * @param {object} property - Property hash with primitiveType
+  * @param {string} property.type - type/"class" of the property
+  * @param {string} property.primitiveType - "typeof-type" of the property
+  * @returns {null|function} - An array of validation functions that return true for valid
+  */
+  function buildValidations (name, property) {
+    var primitiveType = property.primitiveType;
+    var validations = [];
+    if (property.type == RegExp) {
+      validations.push(function (value) {
+        return typeof value == 'string' || (typeof value == 'object' && value instanceof RegExp);
+      });
+    } else if (primitiveType != 'object') {
+      validations.push(function (value) {
+        return typeof value === primitiveType;
+      });
+    } else if (property.nullable) {
+      validations.push(function (value) {
+        return value === null || (typeof value == 'object' && value instanceof property.type);
+      });
+    } else {
+      validations.push(function (value) {
+        return typeof value == 'object' && value instanceof property.type;
+      });
+    }
+
+    if (primitiveType == 'number') {
+      if (property.min) {
+        validations.push(function (value) {
+          return value >= property.min;
+        });
+      }
+      if (property.max) {
+        validations.push(function (value) {
+          return value <= property.max;
+        });
+      }
+    } else if (primitiveType == 'string') {
+      if (typeof property.minLength == 'number') {
+        validations.push(function (value) {
+          return value.length >= property.minLength;
+        });
+      }
+      if (typeof property.maxLength == 'number') {
+        validations.push(function (value) {
+          return value.length <= property.maxLength;
+        });
+      }
+    }
+
+    return validations;
+  }
 
 }(this));
