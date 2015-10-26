@@ -253,9 +253,40 @@
           return value.length <= property.maxLength;
         });
       }
+      if (property.matches !== undefined) {
+        var matches = property.matches;
+        if (typeof matches == 'string') {
+          try {
+            matches = regExpFromSource(matches);
+          } catch (ex) {
+            throw new Error('Invalid regular expression ' + matches + ' for property ' + name);
+          }
+        } else if (typeof matches != 'object' || !(matches instanceof RegExp)) {
+          throw new TypeError('Invalid value for "matches" on property ' + name);
+        }
+
+        validations.push(function (value) {
+          return matches.test(value);
+        });
+      }
     }
 
     return validations;
+  }
+
+  /**
+  * Build a RegExp object from a string
+  *
+  * @param {string} source - Text representation of the RegExp, with flags
+  * @returns {RegExp} - RegExp object with flags from source parameter
+  * @example
+  * regExpFromSource('/[a-z]+/i')
+  * -> RegExp, /[a-z]+/i
+  */
+  function regExpFromSource (source) {
+    var match = source.match(/^\/(.*)\/([gimy])*$/);
+    if (!match) return /(?:)/;
+    return new RegExp(match[1], match[2]);
   }
 
 }(this));
