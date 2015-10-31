@@ -6,6 +6,7 @@
   "main": "catwalk.js",
   "scripts": {
     "test": "mocha",
+    "test-watch": "mocha -R min -w 'test/*.js'",
     "jscs": "jscs ."
   },
   "repository": {

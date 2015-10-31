@@ -132,7 +132,11 @@
       } else if (type == 'function') {
 
         // Method definition
-        // TODO
+        allDescriptors[key] = {
+          value: property,
+          writable: false,
+          configurable: true
+        };
 
       } else {
         throw new TypeError();
