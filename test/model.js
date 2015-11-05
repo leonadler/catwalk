@@ -25,7 +25,7 @@ describe('Catwalk.Model', function () {
       lastName: { type: String }
     });
 
-    expect(Person).to.be.instanceOf(Catwalk.Model);
+    expect(Person).to.be.an.instanceOf(Catwalk.Model);
   });
 
   it('should set up a proper prototype chain', function () {
@@ -33,7 +33,7 @@ describe('Catwalk.Model', function () {
       name: { type: String }
     });
 
-    expect(new Model()).to.be.instanceOf(Model);
+    expect(new Model()).to.be.an.instanceOf(Model);
   });
 
 });
