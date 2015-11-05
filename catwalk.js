@@ -146,9 +146,11 @@
     Object.defineProperties(newClass.prototype, allDescriptors);
 
     // Patch models to return expected JSON
+    if (!hasOwn(properties, 'toJSON')) {
     newClass.prototype.toJSON = function () {
       return this._;
     };
+    }
 
     // Patch the prototype chain so created models are "instanceof Catwalk.Model"
     if (this.__proto__ !== undefined) {

@@ -54,4 +54,17 @@ describe('Catwalk.Model json serialization', function () {
     }).to.throw();
   });
 
+  it('copies the toJSON method if one is provided', function () {
+    var myToJSONMethod = function () { return this.departureDate.toISOString(); };
+    var PlaneTicket = new Catwalk.Model('PlaneTicket', {
+      departureDate: Date,
+      toJSON: myToJSONMethod
+    });
+
+    expect(PlaneTicket.prototype).to.have.ownProperty('toJSON');
+    expect(PlaneTicket.prototype.toJSON).to.be.equal(myToJSONMethod);
+    var ticket = new PlaneTicket({ departureDate: new Date() });
+    expect(ticket.toJSON).to.be.equal(myToJSONMethod);
+  });
+
 });
