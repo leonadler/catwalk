@@ -27,11 +27,11 @@ describe('Catwalk.Model value validation', function () {
     expect(function () { human.name = 'Valid name'; }).not.to.throw();
   });
 
-  it('tests pattern matching of string values with "matches"', function () {
+  it('matches string values against a RegExp with "match"', function () {
     var Book = new Catwalk.Model('Book', {
       isbn: {
         type: String,
-        matches: '/^(97[89])?\\d{9}-?\\d$/'
+        match: '/^(97[89])?\\d{9}-?\\d$/'
       }
     });
 
@@ -49,6 +49,39 @@ describe('Catwalk.Model value validation', function () {
     expect(function () { gatsby.isbn = '9787543628588'; }).not.to.throw();
     expect(function () { gatsby.isbn = '0749318529'; }).not.to.throw();
     expect(function () { gatsby.isbn = '142707031-9'; }).not.to.throw();
+  });
+
+  it('matches string values against known formats', function () {
+    it('alphanumeric', function () {
+      var Model = new Catwalk.Model('Model', {
+        name: { type: String, format: 'alphanumeric' }
+      });
+      expect(function () { new Model({ name: 'Abc123' }); }).not.to.throw();
+      expect(function () { new Model({ name: '0123' }); }).not.to.throw();
+      expect(function () { new Model({ name: 'Ab Cd' }); }).to.throw();
+      expect(function () { new Model({ name: 'Wx_Yz' }); }).to.throw();
+    });
+
+    it('email', function () {
+      var User = new Catwalk.Model('User', {
+        email: { type: String, format: 'email' }
+      });
+      expect(function () { new User({ email: 'user@mail.com' }); }).not.to.throw();
+      expect(function () { new User({ email: 'user@mail' }); }).to.throw();
+      expect(function () { new User({ email: '@mail.com' }); }).to.throw();
+      expect(function () { new User({ email: 'gibberish' }); }).to.throw();
+      expect(function () { new User({ email: '151231@2415152.151' }); }).to.throw();
+      expect(function () { new User({ email: 'too many special cases' }); }).to.throw();
+    });
+
+    it('numeric', function () {
+      var Model = new Catwalk.Model('Model', {
+        id: { type: String, format: 'numeric' }
+      });
+      expect(function () { new Model({ id: '51247' }); }).not.to.throw();
+      expect(function () { new Model({ id: '01234' }); }).not.to.throw();
+      expect(function () { new Model({ id: 'ABC' }); }).to.throw();
+    });
   });
 
 });

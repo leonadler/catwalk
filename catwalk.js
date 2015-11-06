@@ -147,9 +147,9 @@
 
     // Patch models to return expected JSON
     if (!hasOwn(properties, 'toJSON')) {
-    newClass.prototype.toJSON = function () {
-      return this._;
-    };
+      newClass.prototype.toJSON = function () {
+        return this._;
+      };
     }
 
     // Patch the prototype chain so created models are "instanceof Catwalk.Model"
@@ -163,11 +163,30 @@
   /// Helper functions & objects
   var slice = Function.prototype.call.bind(Array.prototype.slice);
   var hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+
+  /**
+  * Defaults for a specific primitiveType
+  */
   var defaultForType = {
     boolean: false,
     number: 0,
     string: '',
     object: null
+  };
+
+  /**
+  * Default patterns for property.format validation
+  */
+  var knownFormats = {
+    alphanumeric: /^[0-9A-Za-z]+$/,
+    email: /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/,
+    date: /^(?:19|20)\d\d-(?:1[012]|0[1-9])-(?:0[1-9]|[12]\d|3[01])$/,
+    datetime: /^(?:19|20)\d\d-(?:1[012]|0[1-9])-(?:0[1-9]|[12]\d|3[01])T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(\.\d{1,3})?Z$/,
+    numeric: /^[0-9]+$/,
+    phonenumber: /^\+?[0-9]+([ -]?\d+)*$/,
+    time: /^(?:[01]\d|2[0-3]):[0-5]\d$/,
+    week: /^(?:19|20)\d\d-W(?:0[1-9]|[1-4]\d|5[0-3])$/,
+    year: /^(?:19|20)\d\d$/
   };
 
   /**
@@ -259,20 +278,29 @@
           return value.length <= property.maxLength;
         });
       }
-      if (property.matches !== undefined) {
-        var matches = property.matches;
-        if (typeof matches == 'string') {
+      if (property.format !== undefined) {
+        if (!hasOwn(knownFormats, property.format)) {
+          throw new Error('Unknown format "' + format + '"');
+        }
+        var format = knownFormats[property.format];
+        validations.push(function (value) {
+          return format.test(value);
+        });
+      }
+      if (property.match !== undefined) {
+        var regex = property.match;
+        if (typeof regex == 'string') {
           try {
-            matches = regExpFromSource(matches);
+            match = regExpFromSource(regex);
           } catch (ex) {
-            throw new Error('Invalid regular expression ' + matches + ' for property ' + name);
+            throw new Error('Invalid regular expression ' + regex + ' for property ' + name);
           }
-        } else if (typeof matches != 'object' || !(matches instanceof RegExp)) {
-          throw new TypeError('Invalid value for "matches" on property ' + name);
+        } else if (typeof regex != 'object' || !(regex instanceof RegExp)) {
+          throw new TypeError('Invalid value for "format" on property ' + name);
         }
 
         validations.push(function (value) {
-          return matches.test(value);
+          return regex.test(value);
         });
       }
     }
