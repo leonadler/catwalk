@@ -35,6 +35,10 @@
   }
 
   Catwalk.Model = Model;
+  Catwalk.Model.define = function (name, properties, config) {
+    return createModel.call(this, null, name, properties, config);
+  };
+  Catwalk.Model.extend = createModel;
 
   function createModel (baseClass, name, properties, config) {
     function createInstance (data) {
@@ -70,14 +74,14 @@
 
     // Create a constructor with a "pretty" name for debuggers
     var nameSanitized = (name + '').replace(/[^\w]/g, '_');
-    var newClass = new Function('f', 'slice', 'function ' + nameSanitized + '(){' +
+    var NewClass = new Function('f', 'slice', 'function ' + nameSanitized + '(){' +
       'return f.apply(this,slice(arguments));};return ' + nameSanitized)(createInstance, slice);
 
     // Create correct prototype chain
     if (baseClass) {
       var FakeBaseConstructor = function () { };
       FakeBaseConstructor.prototype = baseClass.prototype;
-      newClass.prototype = new FakeBaseConstructor();
+      NewClass.prototype = new FakeBaseConstructor();
     }
 
     // Define properties
@@ -143,21 +147,33 @@
       }
     }, this);
 
-    Object.defineProperties(newClass.prototype, allDescriptors);
+    Object.defineProperties(NewClass.prototype, allDescriptors);
 
     // Patch models to return expected JSON
     if (!hasOwn(properties, 'toJSON')) {
-      newClass.prototype.toJSON = function () {
+      NewClass.prototype.toJSON = function () {
         return this._;
       };
     }
 
     // Patch the prototype chain so created models are "instanceof Catwalk.Model"
     if (this.__proto__ !== undefined) {
-      newClass.__proto__ = this.__proto__;
+      NewClass.__proto__ = this.__proto__;
     }
 
-    return newClass;
+    // Add a shortcut to `Model.extend()`
+    NewClass.extendAs = function (name, properties, config) {
+      createModel.call(this, NewClass, name, properties, config);
+    };
+
+    // Add a static method `ModelClass.create` that equals to `new ModelClass`
+    NewClass.create = function (data) {
+      return new NewClass(data);
+    };
+
+    // TODO: Fix references to other models, including references to this model
+
+    return NewClass;
   }
 
   /// Helper functions & objects
