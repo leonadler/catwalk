@@ -171,6 +171,36 @@
       return new NewClass(data);
     };
 
+    // Define a list of properties this model has
+    // TODO: change for derived models
+    Object.defineProperty(NewClass, 'propertyNames', {
+      value: Object.keys(properties),
+      writable: false,
+      enumerable: true,
+      configurable: false
+    });
+
+    NewClass.hasProperty = function hasProperty (propname) {
+      return hasOwn(properties, propname);
+    };
+
+    NewClass.isReadonly = function isReadonly (propname) {
+      if (!hasOwn(properties, propname)) return false;
+      return properties[propname].readonly;
+    };
+
+    NewClass.isValidFor = function isValidFor (propname, value) {
+      if (!hasOwn(properties, propname)) return false;
+      if (!hasOwn(properties[propname].validations)) return true;
+      if (!properties[propname].validations.length) return true;
+
+      var isValid = true;
+      properties[propname].validations.forEach(function (validator) {
+        if (!validator(value)) return (isValid = false);
+      });
+      return isValid;
+    };
+
     // TODO: Fix references to other models, including references to this model
 
     return NewClass;
