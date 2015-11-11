@@ -291,7 +291,7 @@
         var regex = property.match;
         if (typeof regex == 'string') {
           try {
-            match = regExpFromSource(regex);
+            regex = regExpFromSource(regex);
           } catch (ex) {
             throw new Error('Invalid regular expression ' + regex + ' for property ' + name);
           }
