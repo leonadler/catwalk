@@ -9,6 +9,7 @@ describe('Catwalk.Model value validation', function () {
     });
 
     var adult;
+    expect(function () { adult = new TaxPayer({ age: 14 }); }).to.throw();
     expect(function () { adult = new TaxPayer({ age: 20 }); }).not.to.throw();
     expect(function () { adult.age = 5; }).to.throw();
     expect(function () { adult.age = 120; }).to.throw();
@@ -20,7 +21,9 @@ describe('Catwalk.Model value validation', function () {
       name: { type: String, minLength: 3, maxLength: 12 }
     });
 
-    var human = new Person({ name: 'John Doe' });
+    var human;
+    expect(function () { human = new Person({ name: '-' }); }).to.throw();
+    expect(function () { human = new Person({ name: 'John Doe' }); }).not.to.throw();
 
     expect(function () { human.name = '-'; }).to.throw();
     expect(function () { human.name = 'Name with 23 characters'; }).to.throw();
@@ -35,7 +38,9 @@ describe('Catwalk.Model value validation', function () {
       }
     });
 
-    var gatsby = new Book({ isbn: '9781597226769' });
+    var gatsby;
+    expect(function () { gatsby = new Book({ isbn: 'invalid' }); }).to.throw();
+    expect(function () { gatsby = new Book({ isbn: '9781597226769' }); }).not.to.throw();
 
     expect(function () { gatsby.isbn = '-'; }).to.throw();
     expect(function () { gatsby.isbn = '97815972267-69'; }).to.throw();
