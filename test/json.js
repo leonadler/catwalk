@@ -31,7 +31,6 @@ describe('Catwalk.Model json serialization', function () {
       impala = Car.fromJSON('{"brand":"Chevrolet","yearOfManufacture":1964}');
     }).not.to.throw();
 
-    expect(impala).to.have.property('brand').and.have.property('yearOfManufacture');
     expect(impala.brand).to.be.equal('Chevrolet');
     expect(impala.yearOfManufacture).to.be.equal(1964);
   });
