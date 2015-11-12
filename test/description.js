@@ -16,22 +16,22 @@ describe('Catwalk.Model self-description', function () {
   });
 
   it('describes its own properties via ModelClass.propertyNames', function () {
-    expect(PersonModel.propertyNames)
+    expect(PersonModel.attributeNames)
     .to.be.an('array')
     .and.to.deep.equal(['id', 'firstName', 'lastName', 'age', 'male']);
   });
 
   it('defines a hasProperty method that tells whether or not a property exists', function () {
-    expect(PersonModel).itself.to.respondTo('hasProperty');
-    expect(PersonModel.hasProperty('id')).to.be.true;
-    expect(PersonModel.hasProperty('firstName')).to.be.true;
-    expect(PersonModel.hasProperty('lastName')).to.be.true;
-    expect(PersonModel.hasProperty('age')).to.be.true;
-    expect(PersonModel.hasProperty('male')).to.be.true;
-    expect(PersonModel.hasProperty('Age')).to.be.false;
-    expect(PersonModel.hasProperty('email')).to.be.false;
-    expect(PersonModel.hasProperty('toString')).to.be.false;
-    expect(PersonModel.hasProperty('toJSON')).to.be.false;
+    expect(PersonModel).itself.to.respondTo('hasAttribute');
+    expect(PersonModel.hasAttribute('id')).to.be.true;
+    expect(PersonModel.hasAttribute('firstName')).to.be.true;
+    expect(PersonModel.hasAttribute('lastName')).to.be.true;
+    expect(PersonModel.hasAttribute('age')).to.be.true;
+    expect(PersonModel.hasAttribute('male')).to.be.true;
+    expect(PersonModel.hasAttribute('Age')).to.be.false;
+    expect(PersonModel.hasAttribute('email')).to.be.false;
+    expect(PersonModel.hasAttribute('toString')).to.be.false;
+    expect(PersonModel.hasAttribute('toJSON')).to.be.false;
   });
 
   it('defines an isReadonly method that tells if a property is readonly', function () {
