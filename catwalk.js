@@ -35,7 +35,7 @@
   }
 
   Catwalk.Model = Model;
-  Catwalk.Model.define = function (name, properties, config) {
+  Catwalk.Model.define = function defineModel (name, properties, config) {
     return createModel.call(this, null, name, properties, config);
   };
   Catwalk.Model.extend = createModel;
@@ -134,7 +134,7 @@
         // Build property descriptor for Object.defineProperties
         var descriptor = {
           enumerable: true,
-          get: function () { return this._[key]; }
+          get: function get () { return this._[key]; }
         };
 
         var setter = buildSetter(key, property);
@@ -173,12 +173,12 @@
     }
 
     // Add a shortcut to `Model.extend()`
-    NewClass.extendAs = function (name, properties, config) {
       createModel.call(this, NewClass, name, properties, config);
+    NewClass.extendAs = function extendAs (name, properties, config) {
     };
 
     // Add a static method `ModelClass.create` that equals to `new ModelClass`
-    NewClass.create = function (data) {
+    NewClass.create = function create (data) {
       return new NewClass(data);
     };
 
@@ -255,7 +255,7 @@
   function buildSetter (name, property) {
     if (typeof property.set == 'function') {
       // If a setter is defined in the property hash just forward to it
-      return function (value) {
+      return function redirectingSetter (value) {
         this._[name] = property.set.call(this, value);
       };
     }
@@ -294,42 +294,42 @@
     var primitiveType = property.primitiveType;
     var validations = [];
     if (property.type == RegExp) {
-      validations.push(function (value) {
+      validations.push(function validateRegExpType (value) {
         return typeof value == 'string' || (typeof value == 'object' && value instanceof RegExp);
       });
     } else if (primitiveType != 'object') {
-      validations.push(function (value) {
+      validations.push(function validatePrimitiveType (value) {
         return typeof value === primitiveType;
       });
     } else if (property.nullable) {
-      validations.push(function (value) {
+      validations.push(function validateNullableObjectType (value) {
         return value === null || (typeof value == 'object' && value instanceof property.type);
       });
     } else {
-      validations.push(function (value) {
+      validations.push(function validateObjectType (value) {
         return typeof value == 'object' && value instanceof property.type;
       });
     }
 
     if (primitiveType == 'number') {
       if (property.min) {
-        validations.push(function (value) {
+        validations.push(function validateMin (value) {
           return value >= property.min;
         });
       }
       if (property.max) {
-        validations.push(function (value) {
+        validations.push(function validateMax (value) {
           return value <= property.max;
         });
       }
     } else if (primitiveType == 'string') {
       if (typeof property.minLength == 'number') {
-        validations.push(function (value) {
+        validations.push(function validateMinLength (value) {
           return value.length >= property.minLength;
         });
       }
       if (typeof property.maxLength == 'number') {
-        validations.push(function (value) {
+        validations.push(function validateMaxLength (value) {
           return value.length <= property.maxLength;
         });
       }
@@ -338,7 +338,7 @@
           throw new Error('Unknown format "' + format + '"');
         }
         var format = knownFormats[property.format];
-        validations.push(function (value) {
+        validations.push(function validateFormat (value) {
           return format.test(value);
         });
       }
@@ -354,7 +354,7 @@
           throw new TypeError('Invalid value for "format" on property ' + name);
         }
 
-        validations.push(function (value) {
+        validations.push(function validateMatch (value) {
           return regex.test(value);
         });
       }
