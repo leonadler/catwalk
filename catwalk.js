@@ -158,14 +158,19 @@
       }
     }, this);
 
-    Object.defineProperties(NewClass.prototype, allDescriptors);
-
     // Patch models to return expected JSON
     if (!hasOwn(properties, 'toJSON')) {
-      NewClass.prototype.toJSON = function () {
+      allDescriptors.toJSON = {
+        value: function toJSON () {
         return this._;
+        },
+        writable: false,
+        enumerable: false,
+        configurable: false
       };
     }
+
+    Object.defineProperties(NewClass.prototype, allDescriptors);
 
     // Patch the prototype chain so created models are "instanceof Catwalk.Model"
     if (this.__proto__ !== undefined) {
@@ -188,6 +193,26 @@
     */
     NewClass.create = function create (data) {
       return new NewClass(data);
+    };
+
+    /**
+    * Create a new instance of the model class from a JSON string or object
+    * while correctly instanciating model attributes.
+    * @param {string|object} json - String to create the instance from
+    * @returns {object} - New instance of the model class
+    */
+    NewClass.fromJSON = function fromJSON (json) {
+      var hash = typeof json == 'object' ? json : JSON.parse(json);
+      Object.keys(attributes).forEach(function (name) {
+        var attrib = attributes[name];
+        if (attrib.primitiveType == 'object' && typeof attrib.type.fromJSON == 'function') {
+          // Create a new submodel instance
+          hash[name] = attrib.type.fromJSON(hash[name]);
+        } else if (!NewClass.isValidFor(name, hash[name])) {
+          throw new TypeError('Invalid value ' + value + ' for property ' + name);
+        }
+      });
+      return new (this)(hash);
     };
 
     // Define a list of attributes this model has
