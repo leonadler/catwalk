@@ -55,7 +55,7 @@
       if (this._ === undefined) {
         Object.defineProperty(this, '_', { value: {} });
       }
-      Object.defineProperty(this, '_model', { value: NewClass, configurable: true });
+      Object.defineProperty(this, '_model', { value: ModelClass, configurable: true });
 
       // Use values from the "data" parameter or default values
       Object.keys(attributes).forEach(function (key) {
@@ -76,7 +76,7 @@
           // If no value is given use "" / 0 / null
           value = defaultForType[attrib.primitiveType];
         }
-        if (!NewClass.isValidFor(key, value)) {
+        if (!ModelClass.isValidFor(key, value)) {
           throw new Error('Invalid value ' + value + ' for attribute ' + name);
         }
         this._[key] = value;
@@ -85,14 +85,14 @@
 
     // Create a constructor with a "pretty" name for debuggers
     var nameSanitized = (name + '').replace(/[^\w]/g, '_');
-    var NewClass = new Function('f', 'slice', 'function ' + nameSanitized + '(){' +
+    var ModelClass = new Function('f', 'slice', 'function ' + nameSanitized + '(){' +
       'return f.apply(this,slice(arguments));};return ' + nameSanitized)(createInstance, slice);
 
     // Create correct prototype chain
     if (baseClass) {
       var FakeBaseConstructor = function () { };
       FakeBaseConstructor.prototype = baseClass.prototype;
-      NewClass.prototype = new FakeBaseConstructor();
+      ModelClass.prototype = new FakeBaseConstructor();
     }
 
     // Define properties
@@ -171,19 +171,19 @@
       };
     }
 
-    Object.defineProperties(NewClass.prototype, allDescriptors);
+    Object.defineProperties(ModelClass.prototype, allDescriptors);
 
     // Patch the prototype chain so created models are "instanceof Catwalk.Model"
     if (this.__proto__ !== undefined) {
-      NewClass.__proto__ = this.__proto__;
+      ModelClass.__proto__ = this.__proto__;
     }
 
     /**
     * Create a subclass of the model
     * @see ModelClass.extend
     */
-    NewClass.extendAs = function extendAs (name, properties, config) {
-      return createModel.call(this, NewClass, name, properties, config);
+    ModelClass.extendAs = function extendAs (name, properties, config) {
+      return createModel.call(this, ModelClass, name, properties, config);
     };
 
     /**
@@ -192,8 +192,8 @@
     * @returns {object} - New model instance
     * @see new ModelClass
     */
-    NewClass.create = function create (data) {
-      return new NewClass(data);
+    ModelClass.create = function create (data) {
+      return new ModelClass(data);
     };
 
     /**
@@ -202,14 +202,14 @@
     * @param {string|object} json - String to create the instance from
     * @returns {object} - New instance of the model class
     */
-    NewClass.fromJSON = function fromJSON (json) {
+    ModelClass.fromJSON = function fromJSON (json) {
       var hash = typeof json == 'object' ? json : JSON.parse(json);
       Object.keys(attributes).forEach(function (name) {
         var attrib = attributes[name];
         if (attrib.primitiveType == 'object' && typeof attrib.type.fromJSON == 'function') {
           // Create a new submodel instance
           hash[name] = attrib.type.fromJSON(hash[name]);
-        } else if (!NewClass.isValidFor(name, hash[name])) {
+        } else if (!ModelClass.isValidFor(name, hash[name])) {
           throw new TypeError('Invalid value ' + value + ' for property ' + name);
         }
       });
@@ -223,7 +223,7 @@
     } else {
       attributeNames = Object.keys(attributes);
     }
-    Object.defineProperty(NewClass, 'attributeNames', {
+    Object.defineProperty(ModelClass, 'attributeNames', {
       value: attributeNames,
       writable: false,
       enumerable: true,
@@ -235,7 +235,7 @@
     * @param {string} propname - Name of the attribute to check
     * @returns {boolean} - True if the attribute exists
     */
-    NewClass.hasAttribute = function hasAttribute (propname) {
+    ModelClass.hasAttribute = function hasAttribute (propname) {
       return hasOwn(attributes, propname);
     };
 
@@ -244,7 +244,7 @@
     * @param {string} propname - Name of the attribute to check
     * @returns {boolean} - True if the attribute is readonly
     */
-    NewClass.isReadonly = function isReadonly (propname) {
+    ModelClass.isReadonly = function isReadonly (propname) {
       if (!hasOwn(attributes, propname)) return false;
       return !!properties[propname].readonly;
     };
@@ -255,7 +255,7 @@
     * @param {*} value - Value to validate
     * @returns {boolean} - true if valid, false if invalid
     */
-    NewClass.isValidFor = function isValidFor (propname, value) {
+    ModelClass.isValidFor = function isValidFor (propname, value) {
       if (!hasOwn(attributes, propname)) return false;
       if (!attributes[propname].validators) return true;
       var isValid = true;
@@ -267,7 +267,7 @@
 
     // TODO: Fix references to other models, including references to this model
 
-    return NewClass;
+    return ModelClass;
   }
 
   /// Helper functions & objects
