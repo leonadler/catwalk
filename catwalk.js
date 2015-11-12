@@ -35,10 +35,10 @@
   }
 
   Catwalk.Model = Model;
-  Catwalk.Model.define = function defineModel (name, properties, config) {
+  Model.define = function defineModel (name, properties, config) {
     return createModel.call(this, null, name, properties, config);
   };
-  Catwalk.Model.extend = createModel;
+  Model.extend = createModel;
 
   function createModel (baseClass, name, properties, config) {
     function createInstance (data) {
@@ -49,12 +49,13 @@
 
       // Call constructor of parent class
       if (baseClass) {
-        baseClass.apply(this, slice(arguments));
+        Function.prototype.apply.call(baseClass, this, slice(arguments));
       }
 
       if (this._ === undefined) {
-        this._ = {};
+        Object.defineProperty(this, '_', { value: {} });
       }
+      Object.defineProperty(this, '_model', { value: NewClass, configurable: true });
 
       // Use values from the "data" parameter or default values
       Object.keys(attributes).forEach(function (key) {
@@ -162,7 +163,7 @@
     if (!hasOwn(properties, 'toJSON')) {
       allDescriptors.toJSON = {
         value: function toJSON () {
-        return this._;
+          return this._;
         },
         writable: false,
         enumerable: false,
@@ -177,12 +178,12 @@
       NewClass.__proto__ = this.__proto__;
     }
 
-      createModel.call(this, NewClass, name, properties, config);
     /**
     * Create a subclass of the model
     * @see ModelClass.extend
     */
     NewClass.extendAs = function extendAs (name, properties, config) {
+      return createModel.call(this, NewClass, name, properties, config);
     };
 
     /**
@@ -217,7 +218,7 @@
 
     // Define a list of attributes this model has
     var attributeNames;
-    if (baseClass && (baseClass instanceof Catwalk.Model)) {
+    if (baseClass && (baseClass instanceof Model)) {
       attributeNames = baseClass.attributeNames.concat(Object.keys(attributes));
     } else {
       attributeNames = Object.keys(attributes);
