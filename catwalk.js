@@ -182,16 +182,21 @@
       return new NewClass(data);
     };
 
-    // Define a list of properties this model has
-    // TODO: change for derived models
-    Object.defineProperty(NewClass, 'propertyNames', {
-      value: Object.keys(attributes),
+    // Define a list of attributes this model has
+    var attributeNames;
+    if (baseClass && (baseClass instanceof Catwalk.Model)) {
+      attributeNames = baseClass.attributeNames.concat(Object.keys(attributes));
+    } else {
+      attributeNames = Object.keys(attributes);
+    }
+    Object.defineProperty(NewClass, 'attributeNames', {
+      value: attributeNames,
       writable: false,
       enumerable: true,
       configurable: false
     });
 
-    NewClass.hasProperty = function hasProperty (propname) {
+    NewClass.hasAttribute = function hasAttribute (propname) {
       return hasOwn(attributes, propname);
     };
 
