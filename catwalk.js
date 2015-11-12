@@ -172,12 +172,20 @@
       NewClass.__proto__ = this.__proto__;
     }
 
-    // Add a shortcut to `Model.extend()`
       createModel.call(this, NewClass, name, properties, config);
+    /**
+    * Create a subclass of the model
+    * @see ModelClass.extend
+    */
     NewClass.extendAs = function extendAs (name, properties, config) {
     };
 
-    // Add a static method `ModelClass.create` that equals to `new ModelClass`
+    /**
+    * Create a new instance of the model class
+    * @param {object} data - Hash of initial attribute values
+    * @returns {object} - New model instance
+    * @see new ModelClass
+    */
     NewClass.create = function create (data) {
       return new NewClass(data);
     };
@@ -196,15 +204,31 @@
       configurable: false
     });
 
+    /**
+    * Returns whether a named attribute is defined on this model class
+    * @param {string} propname - Name of the attribute to check
+    * @returns {boolean} - True if the attribute exists
+    */
     NewClass.hasAttribute = function hasAttribute (propname) {
       return hasOwn(attributes, propname);
     };
 
+    /**
+    * Returns whether or not an attribute is readonly
+    * @param {string} propname - Name of the attribute to check
+    * @returns {boolean} - True if the attribute is readonly
+    */
     NewClass.isReadonly = function isReadonly (propname) {
       if (!hasOwn(attributes, propname)) return false;
       return !!properties[propname].readonly;
     };
 
+    /**
+    * Validates a value for a model attribute
+    * @param {string} propname - Name of the attribute to validate for
+    * @param {*} value - Value to validate
+    * @returns {boolean} - true if valid, false if invalid
+    */
     NewClass.isValidFor = function isValidFor (propname, value) {
       if (!hasOwn(attributes, propname)) return false;
       if (!attributes[propname].validators) return true;
