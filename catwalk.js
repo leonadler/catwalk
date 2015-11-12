@@ -42,9 +42,14 @@
 
   function createModel (baseClass, name, properties, config) {
     function createInstance (data) {
+      // Ensure type of parameter
+      if (data !== undefined && typeof data != 'object') {
+        throw new TypeError('First parameter must be an object hash');
+      }
+
       // Call constructor of parent class
       if (baseClass) {
-        baseClass.apply(this);
+        baseClass.apply(this, slice(arguments));
       }
 
       if (this._ === undefined) {
@@ -54,21 +59,26 @@
       // Use values from the "data" parameter or default values
       Object.keys(attributes).forEach(function (key) {
         var attrib = attributes[key];
+        var value;
         if (data && hasOwn(data, key)) {
-          this._[key] = data[key];
+          value = data[key];
         } else if (hasOwn(attrib, 'default')) {
           var defaultValue = attrib.default;
           if (typeof (defaultValue) == 'function') {
-            this._[key] = defaultValue();
+            value = defaultValue();
           } else {
-            this._[key] = defaultValue;
+            value = defaultValue;
           }
         } else if (attrib.readonly) {
-          throw new TypeError('attribute ' + key + ' without value');
+          throw new Error('Attribute ' + key + ' without value');
         } else {
           // If no value is given use "" / 0 / null
-          this[key] = defaultForType[attrib.primitiveType];
+          value = defaultForType[attrib.primitiveType];
         }
+        if (!NewClass.isValidFor(key, value)) {
+          throw new Error('Invalid value ' + value + ' for attribute ' + name);
+        }
+        this._[key] = value;
       }, this);
     }
 
@@ -91,7 +101,7 @@
     Object.keys(properties).forEach(function (key) {
       var property = properties[key];
 
-      // Support shorter syntax with { name: }
+      // Support shorter syntax with { name: String|Boolean|etc }
       if (property == Boolean || property == String | property == Number || property == RegExp) {
         property = { type: property };
       }
@@ -119,6 +129,7 @@
         // Save the primitive type of the expected value for "typeof" comparison
         attributes[key] = property;
         attributes[key].primitiveType = primitiveType;
+        attributes[key].validators = buildValidators(name, property);
 
         // Build property descriptor for Object.defineProperties
         var descriptor = {
@@ -174,28 +185,26 @@
     // Define a list of properties this model has
     // TODO: change for derived models
     Object.defineProperty(NewClass, 'propertyNames', {
-      value: Object.keys(properties),
+      value: Object.keys(attributes),
       writable: false,
       enumerable: true,
       configurable: false
     });
 
     NewClass.hasProperty = function hasProperty (propname) {
-      return hasOwn(properties, propname);
+      return hasOwn(attributes, propname);
     };
 
     NewClass.isReadonly = function isReadonly (propname) {
-      if (!hasOwn(properties, propname)) return false;
-      return properties[propname].readonly;
+      if (!hasOwn(attributes, propname)) return false;
+      return !!properties[propname].readonly;
     };
 
     NewClass.isValidFor = function isValidFor (propname, value) {
-      if (!hasOwn(properties, propname)) return false;
-      if (!hasOwn(properties[propname].validations)) return true;
-      if (!properties[propname].validations.length) return true;
-
+      if (!hasOwn(attributes, propname)) return false;
+      if (!attributes[propname].validators) return true;
       var isValid = true;
-      properties[propname].validations.forEach(function (validator) {
+      attributes[propname].validators.forEach(function (validator) {
         if (!validator(value)) return (isValid = false);
       });
       return isValid;
@@ -256,16 +265,16 @@
     }
 
     // Define a setter based on the property hash which validates the input value
-    var validations = buildValidations(name, property);
-    if (!validations) {
+    var validators = property.validators;
+    if (!validators) {
       return function slackedSetter (value) {
         this._[name] = value;
       };
     }
 
     return function validatingSetter (value) {
-      for (var i = 0; i < validations.length; i++) {
-        if (!validations[i](value)) {
+      for (var i = 0; i < validators.length; i++) {
+        if (!validators[i](value)) {
           throw new TypeError('Invalid value ' + value + ' for property ' + name);
         }
       }
@@ -281,7 +290,7 @@
   * @param {string} property.primitiveType - "typeof-type" of the property
   * @returns {null|function} - An array of validation functions that return true for valid
   */
-  function buildValidations (name, property) {
+  function buildValidators (name, property) {
     var primitiveType = property.primitiveType;
     var validations = [];
     if (property.type == RegExp) {

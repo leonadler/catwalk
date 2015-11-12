@@ -7,7 +7,7 @@ describe('Catwalk.Model json serialization', function () {
     var Dog = new Catwalk.Model('Dog', {
       name: String
     });
-    var lassie = new Dog('Lassie');
+    var lassie = new Dog({ name: 'Lassie' });
 
     expect(JSON.stringify(lassie)).to.be.equal('{"name":"Lassie"}');
   });

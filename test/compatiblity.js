@@ -7,8 +7,8 @@ describe('Catwalk.Model compatibility', function () {
     expect(Catwalk.Model).itself.to.respondTo('define');
     var Model1 = new Catwalk.Model('Toy', { brand: String });
     var Model2 = Catwalk.Model.define('Toy', { brand: String });
-    var toy1 = new Model1('ToyBrand');
-    var toy2 = new Model2('ToyBrand');
+    var toy1 = new Model1({ brand: 'ToyBrand' });
+    var toy2 = new Model2({ brand: 'ToyBrand' });
 
     expect(JSON.stringify(toy1)).to.be.equal(JSON.stringify(toy2));
   });

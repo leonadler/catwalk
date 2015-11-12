@@ -18,7 +18,7 @@ describe('Catwalk.Model self-description', function () {
   it('describes its own properties via ModelClass.propertyNames', function () {
     expect(PersonModel.propertyNames)
     .to.be.an('array')
-    .and.to.be.equal(['id', 'firstName', 'lastName', 'age', 'male']);
+    .and.to.deep.equal(['id', 'firstName', 'lastName', 'age', 'male']);
   });
 
   it('defines a hasProperty method that tells whether or not a property exists', function () {
@@ -34,14 +34,14 @@ describe('Catwalk.Model self-description', function () {
     expect(PersonModel.hasProperty('toJSON')).to.be.false;
   });
 
-  it('defines a isReadonly method that tells if a property is readonly', function () {
+  it('defines an isReadonly method that tells if a property is readonly', function () {
     expect(PersonModel).itself.to.respondTo('isReadonly');
     expect(PersonModel.isReadonly('id')).to.be.true;
     expect(PersonModel.isReadonly('age')).to.be.false;
     expect(PersonModel.isReadonly('notexisting')).to.be.false;
   });
 
-  it('defines a isValidFor method that validates a value', function () {
+  it('defines an isValidFor method that validates a value', function () {
     expect(PersonModel).itself.to.respondTo('isValidFor');
     expect(PersonModel.isValidFor('id', 55)).to.be.true;
     expect(PersonModel.isValidFor('invalidProp', 1)).to.be.false;
